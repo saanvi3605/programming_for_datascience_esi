@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Economic Stress Index — Docker Compose
+#
+#  Services
+#  --------
+#  app       →  Streamlit dashboard  (http://localhost:8501)
+#  pipeline  →  Run the full 14-step data pipeline (one-shot)
+#
+#  Quick start
+#  -----------
+#  1. Copy .env.example → .env and fill in your API keys
+#  2. docker compose up app          # just the dashboard
+#  3. docker compose run --rm pipeline   # run pipeline first, then dashboard
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Streamlit Dashboard ─────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: esi-dashboard:latest
+    container_name: esi_app
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - FRED_API_KEY=${FRED_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      # Persist all generated data & results on the host
+      - ./data:/app/data
+      - ./results:/app/results
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Pipeline Runner (one-shot) ──────────────────────────────────────────────
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: esi-dashboard:latest
+    container_name: esi_pipeline
+    env_file:
+      - .env
+    environment:
+      - FRED_API_KEY=${FRED_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    # Override default CMD to run the pipeline instead of the dashboard
+    command: ["python", "run_pipeline.py"]
+    # Do not restart automatically — pipeline is a one-shot job
+    restart: "no"
