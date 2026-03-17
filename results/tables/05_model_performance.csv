@@ -1,0 +1,10 @@
+model,horizon,roc_auc,pr_auc,brier_score,optimal_threshold
+Logistic Regression,Contemporaneous (standard),0.815,0.369,0.186,1.0
+XGBoost,Contemporaneous (standard),0.947,0.552,0.053,0.727
+LightGBM,Contemporaneous (standard),0.946,0.589,0.056,0.871
+Logistic Regression,Forward +6m (standard),0.754,0.461,0.319,0.996
+XGBoost,Forward +6m (standard),0.897,0.543,0.098,0.448
+LightGBM,Forward +6m (standard),0.883,0.503,0.094,0.324
+Logistic Regression,Forward +6m (start only — sharp),0.609,0.118,0.265,0.107
+XGBoost,Forward +6m (start only — sharp),0.667,0.276,0.058,0.533
+LightGBM,Forward +6m (start only — sharp),0.667,0.287,0.06,0.676
